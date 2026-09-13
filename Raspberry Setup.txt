@@ -1,0 +1,312 @@
+Wi-Fi 검색 명령어
+==================
+nmcli dev wifi list
+
+강제로 주변 네트워크를 다시 스캔한 뒤 목록을 갱신하려면 아래 명령어를 사용합니다.
+===========================================
+nmcli dev wifi rescan && nmcli dev wifi list
+
+와이파이별 고정 아이피
+------------------------
+1단계: 저장된 와이파이 프로필 이름 정확히 확인하기
+==============================
+nmcli connection show
+(출력 결과 중 NAME 항목에 나오는 이름(예: Company_WiFi, Home_WiFi)을 확인합니다.)
+
+2단계: 회사 Wi-Fi 프로필에 고정 IP 설정하기
+===============================
+- 암호 없는 경우
+nmcli dev wifi connect "회사_와이파이_이름"
+nmcli connection modify "회사_와이파이_이름" ipv4.addresses 192.168.0.100/24 ipv4.gateway 192.168.0.1 ipv4.dns "8.8.8.8" ipv4.method manual
+- 암호 있는 경우
+nmcli dev wifi connect "회사_와이파이_이름" password "xxxx"
+nmcli connection modify "회사_와이파이_이름" ipv4.addresses 192.168.0.100/24 ipv4.gateway 192.168.0.1 ipv4.dns "8.8.8.8,1.68.226.1" ipv4.method manual
+192.168.0.100/24: 회사에서 사용할 라즈베리 파이의 고정 IP
+
+192.168.0.1: 회사 공유기의 IP (게이트웨이)
+
+3단계: 집 Wi-Fi 프로필에 고정 IP 설정하기
+===============================
+nmcli connection modify pwh ipv4.addresses 192.168.0.87/24 ipv4.gateway 192.168.0.1 ipv4.dns "8.8.8.8,1.1.1.1" ipv4.method manual
+192.168.0.87/24: 집에서 사용할 라즈베리 파이의 고정 IP
+
+4단계: 설정 적용 및 확인
+=========================
+nmcli connection up "현재_장소의_와이파이_이름"
+ip a
+wlan0 인터페이스에 각 프로필에서 지정한 고정 IP가 정상적으로 할당되었는지 확인하시면 됩니다. 
+이렇게 설정해 두면 회사의 와이파이 범위 내에서는 회사 IP로, 집의 와이파이 범위 내에서는 집 IP로 자동 연결됩니다.
+
+DNS 설정 확인 명령어
+============
+resolvectl status
+
+또는 전통적인 설정 파일을 직접 확인할 수도 있습니다.
+================
+cat /etc/resolv.conf
+
+네트워크 상세 설정 확인 명령어
+=======================
+nmcli device show wlan0
+
+라즈베리 시스템 최신화
+=======================
+apt list --upgradable
+apt upgrade
+==== apt full-upgrade ---까지는 말자
+
+파이썬 개발환경
+=================
+1. 패키지 목록 업데이트 및 파이썬 기본 도구 설치
+apt update
+apt install python3 python3-pip python3-venv -y
+
+2. 설치 버전 확인
+python3 --version
+pip3 --version
+
+3. 프로젝트용 가상환경(Virtual Environment) 생성 및 활성화
+mkdir my_project && cd my_project
+python3 -m venv venv
+source venv/bin/activate
+
+4. 가상환경 종료 방법
+deactivate
+
+5. venv 생성
+mkdir -p /home/pi/baechaweb
+cd /home/pi/baechaweb
+python3 -m venv .venv
+source .venv/bin/activate
+which python
+which pip
+pip install flask gunicorn flask-sqlalchemy
+pip install requests
+pip install locust
+pip install gevent
+pip freeze > requirements.txt
+
+sudo apt install sqlite3
+
+------
+cd ~/baechaweb/Survey
+source ../.venv/bin/activate
+python app.py > app.log 2>&1 &
+
+-------
+cd ~/baechaweb/Survey
+source ../.venv/bin/activate
+gunicorn --bind 0.0.0.0:80 app:app
+
+인증서 이용한 gunicorn 실행
+sudo gunicorn --certfile=/etc/letsencrypt/live/baecha.duckdns.org/fullchain.pem --keyfile=/etc/letsencrypt/live/baecha.duckdns.org/privkey.pem -w 2 -b 0.0.0.0:443 app:app
+
+sudo ../.venv/bin/gunicorn \
+    --certfile=/etc/letsencrypt/live/baecha.duckdns.org/fullchain.pem \
+    --keyfile=/etc/letsencrypt/live/baecha.duckdns.org/privkey.pem \
+    --workers 2 --threads 2 \
+    -b 0.0.0.0:443 \
+    --access-logfile gunicorn-access.log \
+    --error-logfile gunicorn-error.log \
+    app:app &
+
+
+------
+gunicorn --bind 0.0.0.0:80 --workers 2 --threads 2 app:app > gunicorn.log 2>&1 &
+gunicorn \
+  --bind 0.0.0.0:80 \
+  --workers 2 \
+  --threads 2 \
+  --access-logfile gunicorn-access.log \
+  --error-logfile gunicorn-error.log \
+  app:app &
+
+gunicorn --bind 0.0.0.0:80 --workers 2 --threads 2 --access-logfile gunicorn-access.log --error-logfile gunicorn-error.log app:app &
+
+pstree -ap | grep gunicorn
+
+
+
+pwh.iptime.org
+wo**/ma**~4
+
+C:\Program Files (x86)\teraterm\TERATERM.INI
+KEYBOARD.CNF — 키보드 매핑
+TERATERM.INI 안에 폰트, 색상, 창 크기, 터미널 설정, 접속 관련 기본값 등이 저장됩니다.
+
+ssh-keygen -t rsa -b 4096
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+
+2.-------------------
+Natizyskunk.sftp 계열의 SFTP 확장을 설치
+
+SFTP: Config
+그러면 프로젝트에: .vscode/sftp.json 이 생성됩니다.
+2. Raspberry Pi 접속 정보 설정
+{
+ "name": "Raspberry Pi",
+    "host": "192.168.0.87",
+    "protocol": "sftp",
+    "port": 22,
+    "username": "pi",
+    "remotePath": "/home/pi",
+    "localPath": "/Raspberry/pi",
+    "uploadOnSave": false,
+    "syncOption": {
+        "delete": false
+    }
+}
+
+{
+    "name": "Raspberry Pi",
+    "host": "pwh.iptime.org",
+    "protocol": "sftp",
+    "port": 22,
+    "username": "pi",
+    "remotePath": "/home/pi/baechaweb",
+	"privateKeyPath": ".ssh/id_rsa",
+	"downloadOnOpen": true,
+    "uploadOnSave": false,
+    "syncOption": {
+        "delete": false
+    }
+}
+
+
+%userprofile%\.vscode\extensions\natizyskunk.sftp-1.16.3\node_modules\ssh2\lib\protocol\SFTP.js
+{
+	const { inherits, isDate } = require('util');
+}
+{
+	const { inherits } = require('util');
+	const isDate = (d) => d instanceof Date;
+}
+
+
+DuckDns 등록
+=====================
+ID: git hub id 사용 -> woenho@daum.net
+ddns:baecha.duckdns.org
+token:8110a501-25ae-4ee2-a9b4-a97e76bf53b1
+
+sudo mkdir -p /opt/duckdns
+sudo nano /opt/duckdns/duck.sh
+echo url="https://www.duckdns.org/update?domains=baecha&token=8110a501-25ae-4ee2-a9b4-a97e76bf53b1&ip=" | curl -k -o /var/log/duckdns/duck.log -K -
+sudo chmod +x /opt/duckdns/duck.sh
+sudo mkdir -p /var/log/duckdns 
+sudo /opt/duckdns/duck.sh
+cat /var/log/duckdns/duck.log
+
+sudo crontab -e
+===========================
+* * * * * 명령어
+│ │ │ │ │
+│ │ │ │ └───── 요일 (0 - 6, 일요일=0 또는 7)
+│ │ │ └─────── 월 (1 - 12)
+│ │ └───────── 일 (1 - 31)
+│ └─────────── 시간 (0 - 23)
+└───────────── 분 (0 - 59)
+2. 특수문자 및 기호 사용법
+    * (Asterisk): 모든 값(매 분, 매 시간 등)을 의미합니다.
+    , (Comma): 특정 값들을 나열할 때 사용합니다. (예: 0, 30 은 0분과 30분)
+    - (Hyphen): 범위 지정에 사용합니다. (예: 9-18 은 9시부터 18시까지)
+    / (Slash): 주기(간격)를 설정할 때 사용합니다. (예: */10 은 10분마다)
+
+3. 자주 사용하는 설정 예시
+    매년/매월/매일 매시간 정각 (0 * * * *): 1시간마다 (매 정각) 실행
+    매일 새벽 3시 30분 (30 3 * * *): 하루에 한 번 특정 시간에 실행
+    매주 월요일 오전 9시 0분 (0 9 * * 1): 일주일에 한 번 실행
+    매월 1일 자정 (0 0 1 * *): 한 달에 한 번 실행
+
+4. duckdns 한시간마다 자동등록
+{
+    # */59 -> 59분마다 실행한다 (분의 최대값)
+    #    0 -> 1시간마다 실행한다
+
+    0 * * * * /opt/duckdns/duck.sh >> /var/log/duckdns/duck.log 2>&1
+}
+
+
+ssl 인증서 발급
+==============
+sudo apt update
+sudo apt install certbot -y
+sudo certbot certonly --standalone -d baecha.duckdns.org --email woenho@daum.net --agree-tos --no-eff-email
+
+ssl 인증서 자동 갱신
+------------------
+Let's Encrypt 인증서는 유효기간이 90일이므로 정기적으로 갱신해 주어야 합니다. 
+다행히 앞서 Certbot을 설치할 때 시스템에 자동 갱신 타이머(또는 cron 작업)가 함께 등록되었지만, 
+인증서가 갱신된 이후에 Gunicorn이 새 인증서 파일을 읽을 수 있도록 웹서버를 재시작(Reload)해 주는 후처리 작업이 필요합니다.
+
+1.dry-run으로 갱신 기능 점검하기:
+Certbot 자동 갱신 테스트.터미널에 아래 명령어를 입력하여 갱신이 오류 없이 잘 작동하는지 시뮬레이션(테스트)해봅니다.
+sudo certbot renew --dry-run
+성공 여부 확인: The simulated renewal succeeded. 
+메시지가 출력되면 자동 갱신 시스템이 정상 작동 상태임을 의미합니다.
+
+2.post-hook 등록하기:
+갱신 후 Gunicorn 자동 재시작 설정.
+인증서가 성공적으로 갱신된 직후 Gunicorn(또는 systemd 서비스)을 재시작하도록 Certbot 설정에 후크(hook)를 추가하거나, 
+systemd 디렉터리에 갱신 스크립트를 배치할 수 있습니다.
+가장 간편한 방법은 renew 명령어 실행 시 --post-hook 옵션을 함께 사용하거나 
+Certbot 설정 파일(.conf)에 리로드 명령을 지정하는 것입니다.
+만약 systemd 서비스를 등록해 두셨다면, 
+Certbot의 renewal 설정 파일(/etc/letsencrypt/renewal/baecha.duckdns.org.conf)을 열어 
+renew_hook을 아래와 같이 추가할 수 있습니다:
+
+sudo certbot renew --dry-run --renew-hook "echo 'Cert renewed, restart gunicorn manually or script here'"
+
+오랜만에 서버를 켰을 때 수동 갱신 방법
+--------------------------
+서버를 오랜만에 켜신 후 터미널에 아래 명령어를 입력하여 현재 인증서 상태를 확인하고 갱신을 진행하시면 됩니다.
+sudo certbot renew
+
+인증서 유효기간 지나면
+=================
+sudo pkill gunicorn
+sudo certbot renew --force-renewal
+
+Fail2ban 설치
+======================
+1.패키지 설치 및 실행하기:
+라즈베리 파이 터미널에 아래 명령어를 입력하여 Fail2ban을 설치합니다.
+sudo apt install fail2ban -y
+
+2.403 에러 패턴 지정하기:
+커스텀 필터(Filter) 생성.
+Flask의 Gunicorn 접근 로그에서 403 응답을 발생시키는 악성 스캔 봇의 IP를 잡아내기 위한 필터를 만듭니다.
+sudo nano /etc/fail2ban/filter.d/flask-scanner.conf
+파일 안에 아래 내용을 입력하고 저장합니다 (Ctrl + O, Enter, Ctrl + X)
+[Definition]
+failregex = ^<HOST> - - \[.*\] "(GET|POST|HEAD).* (403|404) .*$
+ignoreregex =
+
+3.차단 규칙 및 연동 설정하기:
+제일(Jail) 설정 추가.
+Fail2ban이 어떤 로그를 보고 어떤 방화벽(UFW)을 통해 차단할지 설정합니다.
+sudo nano /etc/fail2ban/jail.local
+
+파일에 아래 설정을 추가합니다 (기존 내용이 있다면 하단에 붙여넣습니다).
+[flask-scanner]
+enabled = true
+port = http,https
+logpath = /home/pi/baechaweb/Survey/gunicorn-access.log
+filter = flask-scanner
+maxretry = 3
+bantime = 86400
+findtime = 600
+banaction = ufw
+
+
+설정 의미: 60초(findtime) 동안 비정상 경로 접근으로 3번 이상(maxretry) 403/404 에러를 유발하면, 
+UFW 방화벽을 통해 해당 IP를 24시간(bantime = 86400) 동안 차단합니다.
+
+4.설정 적용하기:
+Fail2ban 재시작.
+작성한 설정을 반영하기 위해 Fail2ban 서비스를 재시작합니다.
+sudo systemctl restart fail2ban
+성공 여부 확인: 
+sudo fail2ban-client status flask-scanner 
+명령어를 입력했을 때 감시가 정상적으로 시작되었는지(Status) 확인합니다.
