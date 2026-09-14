@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>근무 성향 조사</title>
+    <style>
+        body {
+            font-family: '맑은 고딕', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 90vh;
+            box-sizing: border-box;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            font-size: 28px;
+            color: #1a365d;
+            margin-bottom: 25px;
+            word-break: keep-all;
+        }
+        .purpose-text {
+            font-size: 20px;
+            color: #333333;
+            line-height: 1.6;
+            text-align: left;
+            background-color: #ebf8ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 6px solid #3182ce;
+            margin-bottom: 30px;
+            word-break: keep-all;
+        }
+        .btn-main {
+            display: block;
+            width: 100%;
+            padding: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #2b6cb0;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-main:active {
+            background-color: #2c5282;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>버스기사 근무 배정<br>성향 조사</h1>
+        
+        <div class="purpose-text">
+            <b>[안내]</b><br>
+            대체 근무 발생 시 기사님들의 자발적 의사를 반영하여 합리적으로 근무표를 작성하고자 합니다.<br><br>
+            간단한 설문에 응답해 주시면 근무 배치에 참고하겠습니다.
+        </div>
+
+        <a href="/login" class="btn-main">로그인 하기</a>
+    </div>
+</body>
+</html>

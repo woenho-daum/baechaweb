@@ -13,8 +13,11 @@ def block_scanners():
 # ---------------------------------------------
     
 @app.route("/")
-def index():
-    return "Survey App is running!"
+def home():
+    with open("./page/login.html", encoding="utf-8") as f:
+        html = f.read()
+
+    return html
 
 
 if __name__ == "__main__":

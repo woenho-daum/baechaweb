@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인</title>
+    <style>
+        body {
+            font-family: '맑은 고딕', sans-serif;
+            background-color: #f4f6f9;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-top: 40px;
+        }
+        h2 {
+            font-size: 26px;
+            text-align: center;
+            color: #1a365d;
+            margin-bottom: 30px;
+        }
+        label {
+            font-size: 20px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+        input[type="tel"] {
+            width: 100%;
+            padding: 18px;
+            font-size: 24px;
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        input[type="tel"]:focus {
+            border-color: #3182ce;
+            outline: none;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #319795;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .error {
+            color: #e53e3e;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>전화번호 인증</h2>
+        
+        {% if error_msg %}
+            <div class="error">{{ error_msg }}</div>
+        {% endif %}
+
+        <form action="/login" method="POST">
+            <label for="phone">휴대폰 번호 입력</label>
+            <input type="tel" id="phone" name="phone" placeholder="01012345678" required pattern="[0-9]*">
+            <button type="submit" class="btn-submit">확인 요청</button>
+        </form>
+    </div>
+</body>
+</html>
