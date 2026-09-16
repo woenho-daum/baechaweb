@@ -1,200 +1,20 @@
--- ============================================================
--- 휴무일 대체근무 연락 등록 시스템
--- 설문 DB 전체 초기화 + 기본 조사표 생성
---
--- 주의:
--- 1. drivers 테이블과 기사 데이터는 삭제하지 않음
--- 2. 기존 설문/응답 데이터는 모두 삭제됨
--- 3. 최초 조사표를 survey_id = 1 로 생성
--- ============================================================
+BEGIN TRANSACTION;
+
+-- =========================================================
+-- 기존 설문 데이터 삭제
+-- ※ drivers 테이블의 기사 기본정보는 삭제하지 않습니다.
+-- =========================================================
+
+DELETE FROM survey_answers;
+DELETE FROM drivers_survey_link;
+DELETE FROM survey_options;
+DELETE FROM survey_questions;
+DELETE FROM survey_master;
 
 
--- ============================================================
--- 0. 외래키 일시 해제
--- ============================================================
-
-PRAGMA foreign_keys = OFF;
-
-
--- ============================================================
--- 1. 기존 설문 데이터 삭제
---    자식 테이블부터 삭제
--- ============================================================
-
-DROP TABLE IF EXISTS survey_answers;
-DROP TABLE IF EXISTS survey_options;
-DROP TABLE IF EXISTS survey_questions;
-DROP TABLE IF EXISTS drivers_survey_link;
-DROP TABLE IF EXISTS survey_master;
-
-
--- ============================================================
--- 2. 기존 인덱스 제거
--- ============================================================
-
-DROP INDEX IF EXISTS ux_survey_master_active;
-DROP INDEX IF EXISTS idx_sdl_survey_id;
-DROP INDEX IF EXISTS idx_questions_survey;
-
-
--- ============================================================
--- 3. 설문 마스터
--- ============================================================
-
-CREATE TABLE survey_master (
-    survey_id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    survey_title    TEXT NOT NULL,
-    description     TEXT,
-    is_active       INTEGER NOT NULL DEFAULT 0
-                    CHECK (is_active IN (0,1))
-);
-
-
--- 활성 조사표는 동시에 하나만 허용
-CREATE UNIQUE INDEX ux_survey_master_active
-ON survey_master(is_active)
-WHERE is_active = 1;
-
-
--- ============================================================
--- 4. 기사 ↔ 조사표 연결
--- ============================================================
-
-CREATE TABLE drivers_survey_link (
-    driver_name     TEXT NOT NULL,
-    survey_id       INTEGER NOT NULL,
-    completed       INTEGER NOT NULL DEFAULT 0
-                    CHECK (completed IN (0,1)),
-    created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (driver_name, survey_id),
-
-    FOREIGN KEY (driver_name)
-        REFERENCES drivers(name)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    FOREIGN KEY (survey_id)
-        REFERENCES survey_master(survey_id)
-        ON DELETE CASCADE
-);
-
-
-CREATE INDEX idx_sdl_survey_id
-ON drivers_survey_link(survey_id);
-
-
--- ============================================================
--- 5. 설문 문항
--- ============================================================
-
-CREATE TABLE survey_questions (
-    survey_id       INTEGER NOT NULL,
-    question_no     INTEGER NOT NULL,
-    question_text   TEXT NOT NULL,
-
-    -- single : 하나 선택
-    -- multi  : 여러 개 선택
-    -- text   : 직접 입력
-    question_type   TEXT NOT NULL
-                    CHECK (question_type IN ('single','multi','text')),
-
-    is_required     INTEGER NOT NULL DEFAULT 1
-                    CHECK (is_required IN (0,1)),
-
-    PRIMARY KEY (survey_id, question_no),
-
-    FOREIGN KEY (survey_id)
-        REFERENCES survey_master(survey_id)
-        ON DELETE CASCADE
-);
-
-
-CREATE INDEX idx_questions_survey
-ON survey_questions(survey_id, question_no);
-
-
--- ============================================================
--- 6. 문항 선택지
--- ============================================================
-
-CREATE TABLE survey_options (
-    survey_id       INTEGER NOT NULL,
-    question_no     INTEGER NOT NULL,
-    option_no       INTEGER NOT NULL,
-    option_text     TEXT NOT NULL,
-
-    PRIMARY KEY (
-        survey_id,
-        question_no,
-        option_no
-    ),
-
-    FOREIGN KEY (
-        survey_id,
-        question_no
-    )
-        REFERENCES survey_questions(
-            survey_id,
-            question_no
-        )
-        ON DELETE CASCADE
-);
-
-
--- ============================================================
--- 7. 설문 답변
--- ============================================================
-
-CREATE TABLE survey_answers (
-    driver_name     TEXT NOT NULL,
-    survey_id       INTEGER NOT NULL,
-    question_no     INTEGER NOT NULL,
-
-    -- single / multi 질문에서 사용
-    option_no       INTEGER,
-
-    -- text 질문에서 사용
-    answer_text     TEXT,
-
-    PRIMARY KEY (
-        driver_name,
-        survey_id,
-        question_no,
-        option_no
-    ),
-
-    FOREIGN KEY (driver_name)
-        REFERENCES drivers(name)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (
-        survey_id,
-        question_no
-    )
-        REFERENCES survey_questions(
-            survey_id,
-            question_no
-        )
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (
-        survey_id,
-        question_no,
-        option_no
-    )
-        REFERENCES survey_options(
-            survey_id,
-            question_no,
-            option_no
-        )
-        ON DELETE CASCADE
-);
-
-
--- ============================================================
--- 8. 조사표 생성
--- ============================================================
+-- =========================================================
+-- 1. 설문 기본정보
+-- =========================================================
 
 INSERT INTO survey_master (
     survey_id,
@@ -204,168 +24,216 @@ INSERT INTO survey_master (
 )
 VALUES (
     1,
-    '휴무일 대체근무 관련',
-    '박원호 배차원의 개인적인 수집정보로 누구한테도 절대 배포하지 않음',
+    '휴무일 대체근무',
+'
+<div class="survey-intro">
+
+    <div class="intro-header">
+        <div class="intro-title-area">
+            <div class="intro-title">휴무일 대체근무</div>
+            <div class="intro-subtitle">
+                대체근무 연락을 위한 사전 의향 확인
+            </div>
+        </div>
+    </div>
+
+    <div class="intro-purpose">
+        <p>
+            기사님들의 휴무일 대체근무 의향을 미리 파악하여,
+            배차표 작성 과정에서 근무 공백이 발생할 경우
+            먼저 연락드리기 위한 것입니다.
+        </p>
+    </div>
+
+    <div class="notice-box">
+        <div class="notice-title">
+            꼭 확인해 주십시오
+        </div>
+
+        <div class="notice-item">
+            <span class="notice-mark">✓</span>
+            <span>응답은 전혀 강제되지 않습니다.</span>
+        </div>
+
+        <div class="notice-item">
+            <span class="notice-mark">✓</span>
+            <span>응답하지 않으셔도 아무런 불이익이 없습니다.</span>
+        </div>
+
+        <div class="notice-item">
+            <span class="notice-mark">✓</span>
+            <span>
+                응답하지 않은 경우 대체근무를 원하지 않으시는
+                것으로 이해할 수 있습니다.
+            </span>
+        </div>
+    </div>
+
+    <div class="privacy-box">
+        <p> </p>
+        <div class="privacy-title">
+            🔒 응답 내용 관리
+        </div>
+        <p> </p>
+        <p>
+            본 시스템은 박원호 배차원 개인적으로 구축한 웹시스템입니다.
+        </p>
+
+        <p>
+            입력하신 자료는 대체근무 연락을 위한 목적으로 직접 관리하며,
+            응답 내용의 비밀을 최대한 보장합니다.
+        </p>
+
+        <p>
+            본인이 원하면 언제든지 즉시 파기합니다. (직접 박원호 배차원에게 요청)
+        </p>
+
+        <p>
+            기본적으로 설문은 한 번만 응할수 있으며, 
+            본인이 원하면 언제든지 설문을 다시 진행하여 의사를 변경할 수 있습니다.
+            (직접 박원호 배차원에게 요청)
+        </p>
+    </div>
+
+    <div class="guide-box">
+        <div class="guide-title">
+            ✏️ 응답 방법
+        </div>
+        <p> </p>
+        <p>
+            질문에 따라 <strong>하나만 선택하는 항목</strong>과
+            <strong>여러 개를 선택할 수 있는 항목</strong>이 있습니다.
+        </p>
+
+    </div>
+
+</div>
+',
     1
 );
 
 
--- ============================================================
--- 9. 조사 문항 등록
--- ============================================================
+-- =========================================================
+-- 2. 질문 등록
+-- =========================================================
 
 INSERT INTO survey_questions
-(
-    survey_id,
-    question_no,
-    question_text,
-    question_type,
-    is_required
-)
+    (survey_id, question_no, question_text, question_type, is_required)
 VALUES
-(
-    1,
-    1,
-    '휴무일에 대체근무 연락을 받아볼 의향이 있습니까?',
-    'single',
-    1
-),
-(
-    1,
-    2,
-    '한 달에 대체근무를 어느 정도 하고 싶습니까?',
-    'single',
-    1
-),
-(
-    1,
-    3,
-    '대체근무 요청은 언제까지 연락받는 것이 좋습니까?',
-    'multi',
-    1
-),
-(
-    1,
-    4,
-    '대체근무 연락은 어떤 방법을 선호합니까?',
-    'multi',
-    1
-),
-(
-    1,
-    5,
-    '대체근무 시 특별히 선호하는 조건이 있습니까?',
-    'multi',
-    1
-),
-(
-    1,
-    6,
-    '추가로 전달하고 싶은 내용이 있습니까?',
-    'text',
-    0
-);
+
+    (1, 1,
+     '휴무일 대체근무 의향',
+     'single', 1),
+
+    (1, 2,
+     '월 대체근무 희망 횟수',
+     'single', 1),
+
+    (1, 3,
+     '평시 연락 가능한 시점',
+     'single', 1),
+
+    (1, 4,
+     '긴급 대체근무(당일·전날) 가능 여부',
+     'single', 1),
+
+    (1, 5,
+     '선호 연락방법',
+     'multi', 1),
+
+    (1, 6,
+     '특별한 근무조건',
+     'multi', 1),
+
+    (1, 7,
+     '추가 전달사항',
+     'text', 0);
 
 
--- ============================================================
--- 10. 문항 1 선택지
--- ============================================================
+-- =========================================================
+-- 3. 질문 1 선택지
+-- =========================================================
 
 INSERT INTO survey_options
-(
-    survey_id,
-    question_no,
-    option_no,
-    option_text
-)
+    (survey_id, question_no, option_no, option_text)
 VALUES
-(1, 1, 1, '적극적으로 근무하고 싶음'),
-(1, 1, 2, '가능하면 근무하고 싶음'),
-(1, 1, 3, '연락을 받아보고 결정'),
-(1, 1, 4, '가급적 휴무하고 싶음'),
-(1, 1, 5, '휴무일에는 연락을 원하지 않음');
+    (1, 1, 1, '적극적으로 근무하고 싶음'),
+    (1, 1, 2, '가능하면 근무하고 싶음'),
+    (1, 1, 3, '연락을 받아보고 결정'),
+    (1, 1, 4, '가급적 휴무하고 싶음'),
+    (1, 1, 5, '휴무일에는 연락을 원하지 않음');
 
 
--- ============================================================
--- 11. 문항 2 선택지
--- ============================================================
+-- =========================================================
+-- 4. 질문 2 선택지
+-- =========================================================
 
 INSERT INTO survey_options
-(
-    survey_id,
-    question_no,
-    option_no,
-    option_text
-)
+    (survey_id, question_no, option_no, option_text)
 VALUES
-(1, 2, 1, '가능한 만큼 많이'),
-(1, 2, 2, '월 3~4회'),
-(1, 2, 3, '월 1~2회'),
-(1, 2, 4, '가끔'),
-(1, 2, 5, '그때그때 결정');
+    (1, 2, 1, '가능한 만큼 많이'),
+    (1, 2, 2, '월 3~4회'),
+    (1, 2, 3, '월 1~2회'),
+    (1, 2, 4, '가끔'),
+    (1, 2, 5, '그때그때 결정');
 
 
--- ============================================================
--- 12. 문항 3 선택지
--- ============================================================
+-- =========================================================
+-- 5. 질문 3 선택지
+-- =========================================================
 
 INSERT INTO survey_options
-(
-    survey_id,
-    question_no,
-    option_no,
-    option_text
-)
+    (survey_id, question_no, option_no, option_text)
 VALUES
-(1, 3, 1, '3일 전'),
-(1, 3, 2, '2일 전'),
-(1, 3, 3, '전날'),
-(1, 3, 4, '당일'),
-(1, 3, 5, '갑작스러운 연락도 가능');
+    (1, 3, 1, '최소 3일 전 연락 필요'),
+    (1, 3, 2, '최소 2일 전 연락 필요'),
+    (1, 3, 3, '전날 연락도 가능'),
+    (1, 3, 4, '당일 급구 연락도 가능');
 
 
--- ============================================================
--- 13. 문항 4 선택지
--- ============================================================
+-- =========================================================
+-- 6. 질문 4 선택지
+-- =========================================================
 
 INSERT INTO survey_options
-(
-    survey_id,
-    question_no,
-    option_no,
-    option_text
-)
+    (survey_id, question_no, option_no, option_text)
 VALUES
-(1, 4, 1, '전화'),
-(1, 4, 2, '문자'),
-(1, 4, 3, '카카오톡'),
-(1, 4, 4, '상관없음');
+    (1, 4, 1, '가능'),
+    (1, 4, 2, '상황에 따라 가능'),
+    (1, 4, 3, '불가능');
 
 
--- ============================================================
--- 14. 문항 5 선택지
--- ============================================================
+-- =========================================================
+-- 7. 질문 5 선택지
+-- =========================================================
 
 INSERT INTO survey_options
-(
-    survey_id,
-    question_no,
-    option_no,
-    option_text
-)
+    (survey_id, question_no, option_no, option_text)
 VALUES
-(1, 5, 1, '특별한 조건 없음'),
-(1, 5, 2, '오전 근무 선호'),
-(1, 5, 3, '오후 근무 선호'),
-(1, 5, 4, '특정 조건이 있음');
+    (1, 5, 1, '전화'),
+    (1, 5, 2, '문자'),
+    (1, 5, 3, '카카오톡'),
+    (1, 5, 4, '상관없음');
 
 
--- ============================================================
--- 15. 현재 등록된 모든 기사를 조사표에 연결
--- ============================================================
+-- =========================================================
+-- 8. 질문 6 선택지
+-- =========================================================
 
-INSERT INTO drivers_survey_link
-(
+INSERT INTO survey_options
+    (survey_id, question_no, option_no, option_text)
+VALUES
+    (1, 6, 1, '특별한 조건 없음'),
+    (1, 6, 2, '오전 근무 선호'),
+    (1, 6, 3, '오후 근무 선호'),
+    (1, 6, 4, '특정 조건이 있음 (7번에 작성)');
+
+
+-- =========================================================
+-- 9. 현재 등록된 모든 기사에게 설문 연결
+-- =========================================================
+
+INSERT INTO drivers_survey_link (
     driver_name,
     survey_id,
     completed
@@ -377,50 +245,26 @@ SELECT
 FROM drivers;
 
 
--- ============================================================
--- 16. 외래키 다시 활성화
--- ============================================================
+-- =========================================================
+-- 10. 최종 저장
+-- =========================================================
 
-PRAGMA foreign_keys = ON;
-
-
--- ============================================================
--- 17. 정상적으로 생성되었는지 확인
--- ============================================================
+COMMIT;
 
 SELECT
-    survey_id,
-    survey_title,
-    description,
-    is_active
-FROM survey_master;
-
-
-SELECT
-    survey_id,
-    question_no,
-    question_text,
-    question_type,
-    is_required
-FROM survey_questions
-ORDER BY survey_id, question_no;
-
-
-SELECT
-    survey_id,
-    question_no,
-    option_no,
-    option_text
-FROM survey_options
-ORDER BY survey_id, question_no, option_no;
-
-
-SELECT
-    COUNT(*) AS total_drivers
-FROM drivers_survey_link
-WHERE survey_id = 1;
-
-
--- ============================================================
--- 끝
--- ============================================================
+    q.question_no AS 번호,
+    q.question_text AS 질문,
+    q.question_type AS 유형,
+    o.option_no AS 선택번호,
+    o.option_text AS 선택항목,
+    CASE
+        WHEN q.question_type = 'single' THEN '○'
+        WHEN q.question_type = 'multi' THEN '□'
+        ELSE ''
+    END AS 선택표시
+FROM survey_questions q
+LEFT JOIN survey_options o
+    ON q.survey_id = o.survey_id
+   AND q.question_no = o.question_no
+WHERE q.survey_id = 1
+ORDER BY q.question_no, o.option_no;

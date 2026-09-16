@@ -3,7 +3,8 @@
 -- 1. 기사 기본정보
 -- 이름은 항상 중복되지 않는다는 전제
 -- ============================================================
-DROP TABLE IF EXISTS drivers;
+/*
+DROP TABLE IF EXISTS drivers; -- 이 데이타는 create_survey_db.py 에서 디비도 테이블도 만들고 자료도 넣는다
 
 CREATE TABLE drivers (
     name            TEXT PRIMARY KEY,
@@ -31,7 +32,7 @@ CREATE TABLE drivers (
 CREATE INDEX idx_drivers_off_day ON drivers(off_day);
 CREATE INDEX idx_drivers_shift_day ON drivers(shift_day);
 CREATE INDEX idx_drivers_childcare_day ON drivers(childcare_day);
-
+*/
 
 
 -- ============================================================
