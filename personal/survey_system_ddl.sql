@@ -78,6 +78,7 @@ CREATE TABLE drivers_survey_link (
     driver_name    TEXT NOT NULL,
     survey_id      INTEGER NOT NULL,
     completed      INTEGER NOT NULL DEFAULT 0 CHECK (completed IN (0,1)),
+    survey_date    DATETIME NULL,
     created_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     PRIMARY KEY (driver_name, survey_id),
