@@ -30,8 +30,7 @@ VALUES (
 
     <div class="intro-header">
         <div class="intro-title-area">
-            <div class="intro-title">휴무일 대체근무</div>
-            <div class="intro-subtitle">
+            <div class="intro-title">
                 대체근무 연락을 위한 사전 의향 확인
             </div>
         </div>
