@@ -75,10 +75,11 @@ def login():
             SELECT
                 name,
                 phone,
-                shift_day,
-                off_day,
-                childcare_day
-            FROM drivers
+                dsl.completed,
+                dsl.answer_date 
+            FROM drivers  
+            inner JOIN drivers_survey_link dsl 
+            ON name = dsl.driver_name 
             WHERE phone = ?
         """, (phone,)).fetchone()
 
@@ -94,7 +95,9 @@ def login():
     return jsonify({
         "success": True,
         "name": driver["name"],
-        "phone": driver["phone"]
+        "phone": driver["phone"],
+        "completed": driver["completed"],
+        "answer_date": driver["answer_date"]
     })
 
 def survey():
@@ -123,12 +126,28 @@ def survey():
     conn = get_db()
 
     try:
-        # 설문 응답 저장 로직 추가
-        pass
+        driver = conn.execute("""
+            SELECT
+                name,
+                phone,
+                shift_day,
+                off_day,
+                childcare_day
+            FROM drivers
+            WHERE phone = ?
+        """, (phone,)).fetchone()
+
     finally:
         conn.close()
 
+    if driver is None:
+        return jsonify({
+            "success": False,
+            "message": "등록된 전화번호를 찾을 수 없습니다."
+        }), 404
+
     return jsonify({
         "success": True,
-        "message": "설문이 성공적으로 제출되었습니다."
+        "name": driver["name"],
+        "phone": driver["phone"]
     })
