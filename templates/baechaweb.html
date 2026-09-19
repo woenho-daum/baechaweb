@@ -71,7 +71,7 @@ body{min-height:100vh}
                inputmode="numeric" autocomplete="tel"
                placeholder="010-1234-5678" maxlength="13"
                aria-label="전화번호">
-        <button id="loginButton" class="login-button" type="button">로그인</button>
+        <button id="loginButton" class="login-button" type="button">본인 확인</button>
     </div>
     <div id="message" class="message"></div>
 </section>
@@ -124,7 +124,7 @@ async function doLogin(){
             message.textContent=result.name+" 기사님, 확인되었습니다.";
         }else{
             message.className="message error";
-            message.textContent=result.message||"로그인할 수 없습니다.";
+            message.textContent=result.message||"등록되지않는 기사입니다.";
         }
     }catch(e){
         message.className="message error";
@@ -132,7 +132,7 @@ async function doLogin(){
         console.error(e);
     }finally{
         loginButton.disabled=false;
-        loginButton.textContent="로그인";
+        loginButton.textContent="설문 보기";
     }
 }
 
