@@ -5,44 +5,319 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>{{ survey.survey_title }}</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:#f3f6fb;color:#172b4d;font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif}
-body{min-height:100vh}
-.page{max-width:520px;margin:auto;padding:18px 16px 42px; padding-bottom:38vh}
-.survey-document{position:relative;overflow:hidden;background:#fff;border:1px solid #e2e8f2;border-radius:26px;padding:26px 21px;box-shadow:0 10px 34px rgba(35,65,115,.08)}
-.survey-document:before{content:"";position:absolute;width:180px;height:180px;right:-105px;top:-105px;border-radius:50%;background:#edf3ff}
-.survey-intro{position:relative;z-index:1}
-.intro-title{font-size:clamp(27px,7.2vw,35px);font-weight:800;line-height:1.32;letter-spacing:-1.8px;color:#18315a}
-.intro-title:after{content:"";display:block;width:52px;height:4px;margin-top:13px;border-radius:8px;background:#4c7fe5}
-.intro-purpose{margin-top:22px}
-.intro-purpose p{margin:0;font-size:17px;line-height:1.72;letter-spacing:-.55px;color:#435675}
-.notice-box,.privacy-box,.guide-box{margin-top:20px;padding:18px 16px;border-radius:18px}
-.notice-box{background:#f5f8fe;border:1px solid #e1e9f6}
-.notice-title,.privacy-title,.guide-title{font-size:18px;font-weight:800;color:#24487d}
-.notice-item{display:flex;gap:9px;margin-top:10px;font-size:15.5px;line-height:1.5;color:#536580}
-.notice-mark{flex:0 0 20px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#dfeaff;color:#3972dc;font-size:12px;font-weight:900}
-.privacy-box{background:#fbfcff;border:1px solid #e7ecf5}
-.guide-box{background:#f8fbff;border:1px solid #e2eaf8}
-.privacy-box p,.guide-box p{margin:10px 0 0;font-size:14.5px;line-height:1.65;color:#62718a}
-.login-area{margin-top:20px;padding:22px 19px 20px;border-radius:24px;background:linear-gradient(145deg,#fff,#f7faff);border:1px solid #dfe7f4;box-shadow:0 10px 30px rgba(35,65,115,.09)}
-.login-guide{display:flex;align-items:center;gap:13px;margin-bottom:16px}
-.login-icon{width:46px;height:46px;flex:0 0 46px;border-radius:14px;background:#e8f0ff;display:flex;align-items:center;justify-content:center}
-.login-icon svg{width:25px;height:25px;fill:none;stroke:#3972df;stroke-width:2}
-.login-guide strong{display:block;font-size:18px;line-height:1.35;color:#1c365e}
-.login-guide span{display:block;margin-top:3px;font-size:13.5px;color:#7a879b}
-.login-form{display:flex;flex-direction:column;gap:12px}
-.phone-input{min-width:0;flex:1;height:58px;padding:0 15px;border:2px solid #dce5f3;border-radius:14px;outline:0;background:#fff;color:#172d50;font-family:inherit;font-size:20px;font-weight:600;letter-spacing:.4px}
-.phone-input::placeholder{color:#b4bfce;font-weight:400}
-.phone-input:focus{border-color:#4d7fe5;box-shadow:0 0 0 4px rgba(77,127,229,.1)}
-.login-button{width:100%;height:58px;border:0;border-radius:14px;background:linear-gradient(135deg,#5c8df4,#285bd0);color:#fff;font-family:inherit;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 8px 18px rgba(47,92,200,.2)}
-.login-button:active{transform:translateY(2px)}
-.login-button:disabled{opacity:.55}
-.message{display:none;margin-top:12px;padding:11px 13px;border-radius:11px;text-align:center;font-size:14px}
-.message.error{display:block;background:#fff1f1;color:#bd4036}
-.message.success{display:block;background:#eef6ff;color:#2b62bd}
-.operator{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:25px;color:#708099;font-size:13px}
-.operator:before,.operator:after{content:"";width:42px;height:1px;background:#cdd7e7}
-@media(max-width:380px){.page{padding-left:12px;padding-right:12px;padding-bottom:38vh}.survey-document{padding:23px 17px}.intro-title{font-size:26px}.intro-purpose p{font-size:16px}.notice-item,.guide-box p{font-size:14.5px}.login-area{padding-left:15px;padding-right:15px}.phone-input{font-size:18px}.login-button{width:100%;font-size:16px}}
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    background: #f3f6fb;
+    color: #172b4d;
+    font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+}
+
+.page {
+    max-width: 520px;
+    margin: auto;
+    padding: 18px 16px 42px;
+    padding-bottom: 38vh;
+}
+
+.survey-document {
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e2e8f2;
+    border-radius: 26px;
+    padding: 26px 21px;
+    box-shadow: 0 10px 34px rgba(35, 65, 115, .08);
+}
+
+.survey-document:before {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    right: -105px;
+    top: -105px;
+    border-radius: 50%;
+    background: #edf3ff;
+}
+
+.survey-intro {
+    position: relative;
+    z-index: 1;
+}
+
+.intro-title {
+    font-size: clamp(27px, 7.2vw, 35px);
+    font-weight: 800;
+    line-height: 1.32;
+    letter-spacing: -1.8px;
+    color: #18315a;
+}
+
+.intro-title:after {
+    content: "";
+    display: block;
+    width: 52px;
+    height: 4px;
+    margin-top: 13px;
+    border-radius: 8px;
+    background: #4c7fe5;
+}
+
+.intro-purpose {
+    margin-top: 22px;
+}
+
+.intro-purpose p {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.72;
+    letter-spacing: -.55px;
+    color: #435675;
+}
+
+.notice-box, .privacy-box, .guide-box {
+    margin-top: 20px;
+    padding: 18px 16px;
+    border-radius: 18px;
+}
+
+.notice-box {
+    background: #f5f8fe;
+    border: 1px solid #e1e9f6;
+}
+
+.notice-title, .privacy-title, .guide-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #24487d;
+}
+
+.notice-item {
+    display: flex;
+    gap: 9px;
+    margin-top: 10px;
+    font-size: 20px;
+    line-height: 1.5;
+    color: #536580;
+}
+
+.notice-mark {
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #dfeaff;
+    color: #3972dc;
+    font-size: 23px;
+    font-weight: 900;
+}
+
+.privacy-box {
+    background: #fbfcff;
+    border: 1px solid #e7ecf5;
+}
+
+.guide-box {
+    background: #f8fbff;
+    border: 1px solid #e2eaf8;
+}
+
+.privacy-box p, .guide-box p {
+    margin: 10px 0 0;
+    font-size: 18px;
+    line-height: 1.65;
+    color: #62718a;
+}
+
+.login-area {
+    margin-top: 20px;
+    padding: 22px 19px 20px;
+    border-radius: 24px;
+    background: linear-gradient(145deg, #fff, #f7faff);
+    border: 1px solid #dfe7f4;
+    box-shadow: 0 10px 30px rgba(35, 65, 115, .09);
+}
+
+.login-guide {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 16px;
+}
+
+.login-icon {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    border-radius: 14px;
+    background: #e8f0ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-icon svg {
+    width: 25px;
+    height: 25px;
+    fill: none;
+    stroke: #3972df;
+    stroke-width: 2;
+}
+
+.login-guide strong {
+    display: block;
+    font-size: 22px;
+    line-height: 1.35;
+    color: #1c365e;
+}
+
+.login-guide span {
+    display: block;
+    margin-top: 3px;
+    font-size: 13.5px;
+    color: #7a879b;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.phone-input {
+    min-width: 0;
+    flex: 1;
+    height: 58px;
+    padding: 0 15px;
+    border: 2px solid #dce5f3;
+    border-radius: 14px;
+    outline: 0;
+    background: #fff;
+    color: #172d50;
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: .4px;
+}
+
+.phone-input::placeholder {
+    color: #b4bfce;
+    font-weight: 400;
+}
+
+.phone-input:focus {
+    border-color: #4d7fe5;
+    box-shadow: 0 0 0 4px rgba(77, 127, 229, .1);
+}
+
+.login-button {
+    width: 100%;
+    height: 58px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #5c8df4, #285bd0);
+    color: #fff;
+    font-family: inherit;
+    font-size: 32px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(47, 92, 200, .2);
+}
+
+.login-button:active {
+    transform: translateY(2px);
+}
+
+.login-button:disabled {
+    opacity: .55;
+}
+
+.message {
+    display: none;
+    margin-top: 12px;
+    padding: 11px 13px;
+    border-radius: 11px;
+    text-align: center;
+    font-size: 20px;
+}
+
+.message.error {
+    display: block;
+    background: #fff1f1;
+    color: #bd4036;
+}
+
+.message.success {
+    display: block;
+    background: #eef6ff;
+    color: #2b62bd;
+}
+
+.operator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 25px;
+    color: #708099;
+    font-size: 24px;
+}
+
+.operator:before, .operator:after {
+    content: "";
+    width: 42px;
+    height: 1px;
+    background: #cdd7e7;
+}
+
+@media (max-width: 380px) {
+    .page {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 38vh;
+    }
+    .survey-document {
+        padding: 23px 17px;
+    }
+    .intro-title {
+        font-size: 26px;
+    }
+    .intro-purpose p {
+        font-size: 16px;
+    }
+    .notice-item, .guide-box p {
+        font-size: 20px;
+    }
+    .privacy-title, .guide-title {
+        font-size: 20px;
+    }
+    .privacy-box p, .guide-box p {
+        font-size: 13px;
+    }
+    .login-area {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .phone-input {
+        font-size: 25px;
+    }
+    .login-button {
+        width: 100%;
+        font-size: 26px;
+    }
+}
 </style>
 </head>
 <body>
@@ -81,63 +356,104 @@ body{min-height:100vh}
 </main>
 
 <script>
-const phoneInput=document.getElementById("phone");
-const loginButton=document.getElementById("loginButton");
-const message=document.getElementById("message");
+const phoneInput = document.getElementById("phone");
+const loginButton = document.getElementById("loginButton");
+const message = document.getElementById("message");
+
+let isVerified = false; // 인증 성공 여부를 체크하는 변수
 
 function formatPhone(value){
-    let n=value.replace(/\D/g,"").substring(0,11);
-    if(n.length<=3)return n;
-    if(n.length<=7)return n.substring(0,3)+"-"+n.substring(3);
+    let n = value.replace(/\D/g,"").substring(0,11);
+    if(n.length<=3) return n;
+    if(n.length<=7) return n.substring(0,3)+"-"+n.substring(3);
     return n.substring(0,3)+"-"+n.substring(3,7)+"-"+n.substring(7);
 }
 
-phoneInput.addEventListener("input",function(){
-    this.value=formatPhone(this.value);
+phoneInput.addEventListener("input", function(){
+    this.value = formatPhone(this.value);
 });
 
-async function doLogin(){
-    const phone=phoneInput.value.replace(/\D/g,"");
-    message.className="message";
-    message.textContent="";
+// 버튼 클릭 시 상태에 따라 로그인 또는 설문 페이지 이동 실행
+async function handleButtonClick() {
+    if (!isVerified) {
+        await doLogin();
+    } else {
+        goToSurvey();
+    }
+}
 
-    if(phone.length!==11){
-        message.className="message error";
-        message.textContent="휴대전화 번호를 정확하게 입력해 주세요.";
+// 1. 본인 확인(로그인) 요청 함수
+async function doLogin(){
+    const phone = phoneInput.value.replace(/\D/g,"");
+    message.className = "message";
+    message.textContent = "";
+
+    if(phone.length !== 11){
+        message.className = "message error";
+        message.innerHTML = "휴대전화 번호를 정확하게 입력해 주세요.";
         phoneInput.focus();
         return;
     }
 
-    loginButton.disabled=true;
-    loginButton.textContent="확인";
+    loginButton.disabled = true;
+    loginButton.textContent = "확인 중...";
 
     try{
-        const response=await fetch("/baechaweb/login",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({phone:phone})
+        const response = await fetch("/baechaweb/login",{
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({phone: phone})
         });
-        const result=await response.json();
+        const result = await response.json();
 
         if(result.success){
-            message.className="message success";
-            message.textContent=result.name+" 기사님, 확인되었습니다.";
+            message.className = "message success";
+            message.innerHTML = result.name + " 기사님<br>확인되었습니다.";
+            
+            isVerified = true; // 인증 성공 상태로 변경
+            loginButton.disabled = false;
+            loginButton.textContent = "설문 보기"; // 버튼 텍스트 변경
         }else{
-            message.className="message error";
-            message.textContent=result.message||"등록되지않는 기사입니다.";
+            message.className = "message error";
+            message.textContent = result.message || "등록되지 않은 기사입니다.";
+            loginButton.disabled = false;
+            loginButton.textContent = "본인 확인";
         }
     }catch(e){
-        message.className="message error";
-        message.textContent="서버와 통신하는 중 문제가 발생했습니다.";
+        message.className = "message error";
+        message.textContent = "서버와 통신하는 중 문제가 발생했습니다.";
         console.error(e);
-    }finally{
-        loginButton.disabled=false;
-        loginButton.textContent="설문 보기";
+        loginButton.disabled = false;
+        loginButton.textContent = "본인 확인";
     }
 }
 
-loginButton.addEventListener("click",doLogin);
-phoneInput.addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+// 2. 인증 완료 후 "설문 보기" 클릭 시 /baechaweb/survey로 POST 전송하는 함수
+function goToSurvey() {
+    const phone = phoneInput.value.replace(/\D/g,"");
+    
+    // 동적으로 form 생성
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/baechaweb/survey";
+
+    // 전화번호 데이터를 담을 hidden input 생성
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "phone";
+    input.value = phone;
+
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit(); // 서버로 POST 요청 전송
+}
+
+// 이벤트 리스너 연결
+loginButton.addEventListener("click", handleButtonClick);
+phoneInput.addEventListener("keydown", e => {
+    if(e.key === "Enter") handleButtonClick();
+});
 </script>
+
 </body>
 </html>

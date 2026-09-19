@@ -96,3 +96,39 @@ def login():
         "name": driver["name"],
         "phone": driver["phone"]
     })
+
+def survey():
+    """
+    /baechaweb/survey
+
+    POST JSON:
+    {
+        "phone": "01012345678"
+    }
+    """
+
+    data = request.get_json(silent=True) or {}
+
+    phone = data.get("phone", "").strip()
+
+    # 숫자 이외의 문자가 들어와도 서버에서는 제거
+    phone = "".join(ch for ch in phone if ch.isdigit())
+
+    if not phone:
+        return jsonify({
+            "success": False,
+            "message": "전화번호를 입력해 주세요."
+        }), 400
+
+    conn = get_db()
+
+    try:
+        # 설문 응답 저장 로직 추가
+        pass
+    finally:
+        conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "설문이 성공적으로 제출되었습니다."
+    })

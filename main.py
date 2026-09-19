@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 
-from baechaweb import entry, login
+from baechaweb import entry, login, survey
 
 app = Flask(__name__)
 
@@ -18,6 +18,10 @@ def baechaweb():
 @app.route("/baechaweb/login", methods=["POST"])
 def baechaweb_login():
     return login()
+
+@app.route("/baechaweb/survey", methods=["POST"])
+def baechaweb_survey():
+    return survey()
 
 
 if __name__ == "__main__":
