@@ -410,9 +410,14 @@ async function doLogin(){
             message.className = "message success";
             message.innerHTML = result.name + " 기사님<br>확인되었습니다.";
             
-            isVerified = true; // 인증 성공 상태로 변경
-            loginButton.disabled = false;
-            loginButton.textContent = "설문 보기"; // 버튼 텍스트 변경
+			if(result.completed == '0'){
+            	loginButton.textContent = "설문 보기"; // 버튼 텍스트 변경
+				isVerified = true; // 인증 성공 상태로 변경
+				loginButton.disabled = false;
+			} else {
+				loginButton.textContent = "설문 완료 상태"; // 버튼 텍스트 
+				message.innerHTML = result.name + " 기사님<br>" + result.answer_date + " 일에 설문을 완료하셨습니다.";
+			}
         }else{
             message.className = "message error";
             message.textContent = result.message || "등록되지 않은 기사입니다.";
