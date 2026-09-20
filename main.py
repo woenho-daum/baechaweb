@@ -1,6 +1,6 @@
-from flask import Flask, render_template
+from flask import Flask, render_template  # type: ignore
 
-from baechaweb import entry, login, survey
+from baechaweb import auth, entry, survey
 
 app = Flask(__name__)
 
@@ -15,11 +15,11 @@ def baechaweb():
     return entry()
 
 
-@app.route("/baechaweb/login", methods=["POST"])
-def baechaweb_login():
-    return login()
+@app.route("/baechaweb/auth", methods=["POST"])
+def baechaweb_auth():
+    return auth()
 
-@app.route("/baechaweb/survey", methods=["POST"])
+@app.route("/baechaweb/survey", methods=["GET","POST"])
 def baechaweb_survey():
     return survey()
 

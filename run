@@ -14,7 +14,7 @@ case "$1" in
             --certfile=$CERT_FULLCHAIN \
             --keyfile=$CERT_PRIVKEY \
             --workers 2 --threads 2 \
-            -b 0.0.0.0:7000 \
+            -b 0.0.0.0:443 \
             --access-logfile $ACCESS_LOG \
             --error-logfile $ERROR_LOG \
             main:app &
