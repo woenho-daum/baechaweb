@@ -1,19 +1,27 @@
-from flask import Flask, render_template  # type: ignore
+from flask import Flask, make_response, render_template  # type: ignore
 
 from baechaweb import auth, entry, survey
 
 app = Flask(__name__)
 
-
 @app.route("/")
 def intro():
-    return render_template("baecha_intro.html")
+    response = make_response(
+        render_template("baecha_intro.html")
+    )
 
+    # 기존 JWT 삭제
+    response.delete_cookie("access_token")
+
+    return response
 
 @app.route("/baechaweb", methods=["GET"])
 def baechaweb():
-    return entry()
-
+    response = make_response(entry())
+    # 기존 JWT 삭제 
+    response.delete_cookie("access_token")
+    
+    return response
 
 @app.route("/baechaweb/auth", methods=["POST"])
 def baechaweb_auth():
