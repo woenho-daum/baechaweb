@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>관리자 로그인</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f6f8;
+    font-family: -apple-system, "Malgun Gothic", sans-serif;
+  }
+  .box {
+    width: 320px;
+    background: #fff;
+    border: 1px solid #e0e2e7;
+    border-radius: 10px;
+    padding: 28px;
+  }
+  h1 { font-size: 18px; margin: 0 0 20px; }
+  input {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #e0e2e7;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+  button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #2f6fed;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .error { color: #e2483d; font-size: 13px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+  <form class="box" method="post">
+    <h1>관리자 로그인</h1>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <input type="password" name="password" placeholder="관리자 비밀번호" autofocus>
+    <button type="submit">로그인</button>
+  </form>
+</body>
+</html>

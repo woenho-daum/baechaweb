@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+{% block title %}설문 기본정보{% endblock %}
+{% block content %}
+<div class="card">
+  <h2 style="margin-top:0;">{{ '설문 수정' if survey else '새 설문 만들기' }}</h2>
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  <form method="post"
+        action="{{ url_for('admin_survey_update', survey_id=survey.survey_id) if survey else url_for('admin_survey_create') }}">
+    <label>설문 제목</label>
+    <input type="text" name="survey_title" value="{{ survey.survey_title if survey else '' }}" required>
+
+    <label>부제목</label>
+    <input type="text" name="survey_subtitle" value="{{ survey.survey_subtitle if survey else '' }}">
+
+    <label>안내 내용 (HTML 가능)</label>
+    <textarea name="description" rows="10">{{ survey.description if survey else '' }}</textarea>
+
+    <label>상태</label>
+    <select name="status">
+      {% for value, label in status_labels.items() %}
+      <option value="{{ value }}" {% if survey and survey.status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <div style="margin-top:20px;">
+      <button type="submit" class="btn btn-primary">저장</button>
+      <a class="btn" href="{{ url_for('admin_survey_list') }}">취소</a>
+    </div>
+  </form>
+</div>
+{% if survey %}
+<div class="card" style="color:#767b86;font-size:13px;">
+  저장 후에는 <a href="{{ url_for('admin_survey_questions', survey_id=survey.survey_id) }}">문항 관리</a> 화면에서 질문과 선택지를 등록하세요.
+</div>
+{% endif %}
+{% endblock %}

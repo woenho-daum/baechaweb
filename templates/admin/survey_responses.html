@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+{% block title %}응답 조회{% endblock %}
+{% block content %}
+<div class="card">
+  <h2 style="margin-top:0;">{{ survey.survey_title }} - 응답 현황</h2>
+  <div style="color:#767b86;font-size:13px;">대상자 {{ responses|length }}명</div>
+</div>
+
+{% for driver_name, rows in responses.items() %}
+<div class="card">
+  <div style="font-weight:600;margin-bottom:10px;">{{ driver_name }}</div>
+  <table>
+    <thead><tr><th>질문</th><th>응답</th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.question_text }}</td>
+        <td>
+          {% if r.question_type == 'text' %}
+            {{ r.answer_text or '-' }}
+          {% else %}
+            {{ r.option_text or '-' }}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card">아직 대상자가 없습니다.</div>
+{% endfor %}
+{% endblock %}

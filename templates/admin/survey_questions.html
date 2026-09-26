@@ -1,0 +1,122 @@
+{% extends "admin/base.html" %}
+{% block title %}문항 관리{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2 style="margin-top:0;">{{ survey.survey_title }} - 문항 순서</h2>
+  <div style="color:#767b86;font-size:13px;margin-bottom:12px;">
+    순서 값(작을수록 먼저 표시)을 바꾼 뒤 저장하세요. 내용 수정은 아래 각 질문 카드에서 하세요.
+  </div>
+  <form method="post" action="{{ url_for('admin_question_reorder', survey_id=survey.survey_id) }}">
+    <table>
+      <thead><tr><th style="width:80px;">순서</th><th>질문</th></tr></thead>
+      <tbody>
+        {% for q in questions %}
+        <tr>
+          <td>
+            <input type="hidden" name="question_no" value="{{ q.question_no }}">
+            <input type="text" name="sort_order" value="{{ q.sort_order }}" style="width:60px;">
+          </td>
+          <td>{{ q.question_text }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="2" style="color:#767b86;">등록된 질문이 없습니다.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if questions %}
+    <button type="submit" class="btn btn-primary" style="margin-top:10px;">순서 저장</button>
+    {% endif %}
+  </form>
+</div>
+
+{% for q in questions %}
+<div class="card">
+  <form method="post" action="{{ url_for('admin_question_update', survey_id=survey.survey_id, question_no=q.question_no) }}">
+    <label>질문 {{ q.question_no }}</label>
+    <input type="text" name="question_text" value="{{ q.question_text }}">
+    <label>유형</label>
+    <select name="question_type">
+      <option value="single" {% if q.question_type == 'single' %}selected{% endif %}>단일선택</option>
+      <option value="multi" {% if q.question_type == 'multi' %}selected{% endif %}>복수선택</option>
+      <option value="text" {% if q.question_type == 'text' %}selected{% endif %}>주관식</option>
+    </select>
+    <label><input type="checkbox" name="is_required" {% if q.is_required %}checked{% endif %} style="width:auto;display:inline;"> 필수 응답</label>
+    <div style="margin-top:10px;">
+      <button type="submit" class="btn btn-sm">질문 저장</button>
+    </div>
+  </form>
+  <form method="post" action="{{ url_for('admin_question_delete', survey_id=survey.survey_id, question_no=q.question_no) }}"
+        onsubmit="return confirm('이 질문과 선택지를 삭제하시겠습니까?');" style="margin-top:6px;">
+    <button type="submit" class="btn btn-sm btn-danger">질문 삭제</button>
+  </form>
+
+  {% if q.question_type in ('single', 'multi') %}
+  <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eef0f3;">
+    <div style="font-size:13px;color:#767b86;margin-bottom:8px;">선택지</div>
+    <table>
+      {% for o in options_by_question.get(q.question_no, []) %}
+      <tr>
+        <td style="width:100%;">
+          <form method="post" action="{{ url_for('admin_option_update', survey_id=survey.survey_id, question_no=q.question_no, option_no=o.option_no) }}" style="display:flex;gap:6px;align-items:center;">
+            <input type="text" name="option_text" value="{{ o.option_text }}">
+            <button type="submit" class="btn btn-sm">저장</button>
+          </form>
+        </td>
+        <td style="width:60px;">
+          <form method="post" action="{{ url_for('admin_option_delete', survey_id=survey.survey_id, question_no=q.question_no, option_no=o.option_no) }}"
+                onsubmit="return confirm('선택지를 삭제하시겠습니까?');">
+            <button type="submit" class="btn btn-sm btn-danger">삭제</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <form method="post" action="{{ url_for('admin_option_create', survey_id=survey.survey_id, question_no=q.question_no) }}" style="display:flex;gap:6px;margin-top:6px;">
+      <input type="text" name="option_text" placeholder="새 선택지">
+      <button type="submit" class="btn btn-sm">+ 선택지 추가</button>
+    </form>
+
+    {% if options_by_question.get(q.question_no) %}
+    <form method="post" action="{{ url_for('admin_option_reorder', survey_id=survey.survey_id, question_no=q.question_no) }}" style="margin-top:10px;">
+      <div style="font-size:12px;color:#767b86;margin-bottom:4px;">선택지 순서</div>
+      {% for o in options_by_question.get(q.question_no, []) %}
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+        <input type="hidden" name="option_no" value="{{ o.option_no }}">
+        <input type="text" name="sort_order" value="{{ o.sort_order }}" style="width:60px;">
+        <span style="font-size:13px;color:#767b86;">{{ o.option_text }}</span>
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-sm">선택지 순서 저장</button>
+    </form>
+    {% endif %}
+  </div>
+  {% else %}
+  <div style="margin-top:10px;color:#b7bac1;font-size:12px;">주관식 질문은 선택지가 없습니다.</div>
+  {% endif %}
+</div>
+{% endfor %}
+
+<div class="card">
+  <h3 style="margin-top:0;">새 질문 추가</h3>
+  <form method="post" action="{{ url_for('admin_question_create', survey_id=survey.survey_id) }}">
+    <label>질문 내용</label>
+    <input type="text" name="question_text" required>
+    <label>유형</label>
+    <select name="question_type">
+      <option value="single">단일선택</option>
+      <option value="multi">복수선택</option>
+      <option value="text">주관식</option>
+    </select>
+    <label><input type="checkbox" name="is_required" checked style="width:auto;display:inline;"> 필수 응답</label>
+    <div style="margin-top:14px;">
+      <button type="submit" class="btn btn-primary">질문 추가</button>
+    </div>
+  </form>
+</div>
+
+<div class="card" style="text-align:right;">
+  <a class="btn" href="{{ url_for('admin_survey_preview', survey_id=survey.survey_id) }}">미리보기 →</a>
+  <a class="btn" href="{{ url_for('admin_survey_list') }}">목록으로</a>
+</div>
+{% endblock %}

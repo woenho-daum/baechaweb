@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% block title %}설문 목록{% endblock %}
+{% block content %}
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>제목</th><th>상태</th><th>생성일</th><th style="width:260px;">관리</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in surveys %}
+      <tr>
+        <td>{{ s.survey_id }}</td>
+        <td>
+          {{ s.survey_title }}
+          {% if s.survey_subtitle %}<div style="color:#767b86;font-size:12px;">{{ s.survey_subtitle }}</div>{% endif %}
+        </td>
+        <td><span class="badge">{{ status_labels.get(s.status, s.status) }}</span></td>
+        <td>{{ s.created_at }}</td>
+        <td class="row-actions">
+          <a class="btn btn-sm" href="{{ url_for('admin_survey_edit_form', survey_id=s.survey_id) }}">기본정보</a>
+          <a class="btn btn-sm" href="{{ url_for('admin_survey_questions', survey_id=s.survey_id) }}">문항관리</a>
+          <a class="btn btn-sm" href="{{ url_for('admin_survey_preview', survey_id=s.survey_id) }}">미리보기</a>
+          <a class="btn btn-sm" href="{{ url_for('admin_survey_responses', survey_id=s.survey_id) }}">응답조회</a>
+          <form method="post" action="{{ url_for('admin_survey_delete', survey_id=s.survey_id) }}"
+                onsubmit="return confirm('정말 삭제하시겠습니까?\n\n이 설문을 삭제하면\n\n- 설문 문항\n- 선택지\n- 설문 대상자 연결\n- 기존 응답\n\n도 함께 삭제됩니다.');">
+            <button type="submit" class="btn btn-sm btn-danger">삭제</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" style="color:#767b86;">등록된 설문이 없습니다.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

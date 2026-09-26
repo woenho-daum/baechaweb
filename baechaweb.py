@@ -11,26 +11,32 @@ SECRET_KEY = "your-very-secret-key-change-this"  # 안전한 비밀키로 변경
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    # survey_master 등 삭제 시 ON DELETE CASCADE 가 실제로 동작하려면
+    # 연결마다 이 설정이 켜져 있어야 합니다. (SQLite는 기본값이 꺼짐)
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
 def entry():
     conn = get_db()
     try:
+        # 설문이 여러 개 존재할 수 있으므로 survey_id를 고정하지 않고
+        # 현재 "진행중(status = 1)"인 설문 하나를 조회합니다.
         survey = conn.execute("""
-            SELECT 
-                survey_id, 
-                survey_title, 
-                description, 
-                is_active 
-            FROM survey_master 
-            WHERE survey_id = 1
+            SELECT
+                survey_id,
+                survey_title,
+                survey_subtitle,
+                description,
+                status
+            FROM survey_master
+            WHERE status = 1
         """).fetchone()
     finally:
         conn.close()
 
     if survey is None:
-        return "설문 정보를 찾을 수 없습니다.", 404
+        return "현재 진행중인 설문이 없습니다.", 404
 
     return render_template("baechaweb.html", survey=survey)
 
@@ -47,14 +53,14 @@ def auth():
     try:
         driver = conn.execute(
             """
-            SELECT 
-                name, 
-                phone, 
-                dsl.completed, 
-                dsl.answer_date 
-            FROM drivers  
-            inner JOIN drivers_survey_link dsl 
-            ON name = dsl.driver_name 
+            SELECT
+                name,
+                phone,
+                dsl.completed,
+                dsl.answer_date
+            FROM drivers
+            inner JOIN drivers_survey_link dsl
+            ON name = dsl.driver_name
             WHERE phone = ?
             """,
             (phone,),
@@ -121,14 +127,14 @@ def survey():
     try:
         driver = conn.execute(
             """
-            SELECT 
-                name, 
-                phone, 
-                dsl.completed, 
-                dsl.answer_date 
-            FROM drivers  
-            inner JOIN drivers_survey_link dsl 
-            ON name = dsl.driver_name 
+            SELECT
+                name,
+                phone,
+                dsl.completed,
+                dsl.answer_date
+            FROM drivers
+            inner JOIN drivers_survey_link dsl
+            ON name = dsl.driver_name
             WHERE phone = ?
             """,
             (phone,),
@@ -141,7 +147,7 @@ def survey():
 
     if driver["completed"] == "1":
         return "이미 설문을 완료하였습니다.", 405
-    
+
     # JSON 대신 실제 설문조사 HTML 페이지를 렌더링하여 반환
     # return render_template("survey_form.html", driver=driver)
 
@@ -150,13 +156,13 @@ def survey():
     try:
         driver = conn.execute(
             """
-            SELECT 
-                name, 
-                phone, 
-                shift_day, 
-                off_day, 
-                childcare_day 
-            FROM drivers 
+            SELECT
+                name,
+                phone,
+                shift_day,
+                off_day,
+                childcare_day
+            FROM drivers
             WHERE phone = ?
         """,
             (phone,),

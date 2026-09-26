@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>{% block title %}설문 관리{% endblock %}</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #e0e2e7;
+    --text: #26282c;
+    --muted: #767b86;
+    --accent: #2f6fed;
+    --danger: #e2483d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header .brand { font-weight: 700; }
+  header nav a {
+    margin-left: 16px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  header nav a:hover { color: var(--accent); }
+  main {
+    max-width: 960px;
+    margin: 24px auto;
+    padding: 0 20px 60px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th, td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    vertical-align: top;
+  }
+  th { color: var(--muted); font-weight: 600; }
+  .btn {
+    display: inline-block;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  input[type=text], input[type=password], textarea, select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 4px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: #eef2ff;
+    color: var(--accent);
+  }
+  .error { color: var(--danger); font-size: 13px; margin-top: 8px; }
+  .row-actions { white-space: nowrap; }
+  .row-actions form { display: inline; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">배차웹 · 설문 관리</div>
+  <nav>
+    <a href="{{ url_for('admin_survey_list') }}">설문 목록</a>
+    <a href="{{ url_for('admin_survey_new_form') }}">새 설문 만들기</a>
+    <a href="{{ url_for('admin_logout') }}">로그아웃</a>
+  </nav>
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>

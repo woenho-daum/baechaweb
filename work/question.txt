@@ -1,5 +1,5 @@
-현재 Python으로 운영 중인 배차 관련 웹시스템에
-「설문 관리 기능」을 새로 만들고 싶습니다.
+현재 Python으로 개발 중인 배차 관련 웹시스템을 전면 재개발 하고 싶다
+「설문 관리 기능」도 추가하고 싶다.
 
 단순히 SQL INSERT 문으로 설문을 등록하는 방식이 아니라,
 관리자가 웹 화면에서 설문을 생성하고 수정/조회/삭제할 수 있도록
@@ -10,8 +10,9 @@
 아래에 현재 프로젝트의 정보를 제공합니다.
 
 * 개발 언어: Python
-* 웹 프레임워크: [Flask / FastAPI / Streamlit / 기타]
+* 웹 프레임워크: [Flask / FastAPI / jwt / 기타]
 * DB: SQLite
+
 * 현재 프로젝트 파일 구조:
 
 baechaweb\sqlite -> 데이터베이스 및 관련 파일들 저장소
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     app.run(debug=True)
 	
 
-설문과 관련된 기존 Python 파일이 있다면 다음에 추가합니다.
+설문과 관련된 현재 Python 파일
 --- 현재 baechaweb.py 내용----
 import datetime
 import sqlite3
@@ -242,11 +243,38 @@ def survey():
 
 현재 설문 관련 DB 테이블은 다음과 같습니다.
 
+CREATE TABLE IF NOT EXISTS drivers (
+	name            TEXT PRIMARY KEY,
+	phone           TEXT NOT NULL UNIQUE,
+	shift_day       TEXT NOT NULL CHECK (shift_day IN ('월','화','수','목','금','토','일')),
+	off_day         TEXT NOT NULL CHECK (off_day IN ('월','화','수','목','금','토','일')),
+	childcare_day   TEXT CHECK (
+			childcare_day IS NULL OR childcare_day IN ('월','화','수','목','금','토','일')
+	),
+	childcare_start TEXT NULL CHECK (
+			childcare_start IS NULL OR (
+				length(childcare_start) = 10 AND 
+				strftime('%Y-%m-%d', childcare_start) = childcare_start
+			)
+	),
+	childcare_end   TEXT NULL CHECK (
+			childcare_end IS NULL OR (
+				length(childcare_end) = 10 AND 
+				strftime('%Y-%m-%d', childcare_end) = childcare_end
+			)
+	),
+	CHECK (shift_day <> off_day)
+);
+
+CREATE INDEX IF NOT EXISTS idx_drivers_off_day ON drivers(off_day);
+CREATE INDEX IF NOT EXISTS idx_drivers_shift_day ON drivers(shift_day);
+CREATE INDEX IF NOT EXISTS idx_drivers_childcare_day ON drivers(childcare_day);
+	 
 CREATE TABLE survey_master (
     survey_id       INTEGER PRIMARY KEY AUTOINCREMENT,
     survey_title    TEXT NOT NULL,
     description     TEXT,
-    is_active       INTEGER NOT NULL DEFAULT 0 CHECK (is_active IN (0,1))
+    is_active       INTEGER NOT NULL DEFAULT 0 CHECK (is_active IN (0,1,2,3)) --현재 개발중인지, 설문중인지, 관리중인지, 종료된 것인지...
 );
 
 CREATE UNIQUE INDEX ux_survey_master_active
@@ -348,9 +376,9 @@ CREATE TABLE survey_answers (
 
 # 3. 현재 설문 등록 방식
 
-현재는 다음과 같이 SQL을 직접 작성해서 설문을 생성하고 있습니다.
+현재는 다음과 같이 SQL을 직접 설문자료를 생성하고 있습니다.
 그러나 이것은 없애야합니다.
-들록 화면을 통해 입력 되어야 합니다.
+등록 화면을 통해 입력 되어야 합니다.
 
 ```sql
 BEGIN TRANSACTION;
@@ -605,28 +633,10 @@ FROM drivers;
 
 COMMIT;
 
-SELECT
-    q.question_no AS 번호,
-    q.question_text AS 질문,
-    q.question_type AS 유형,
-    o.option_no AS 선택번호,
-    o.option_text AS 선택항목,
-    CASE
-        WHEN q.question_type = 'single' THEN '○'
-        WHEN q.question_type = 'multi' THEN '□'
-        ELSE ''
-    END AS 선택표시
-FROM survey_questions q
-LEFT JOIN survey_options o
-    ON q.survey_id = o.survey_id
-   AND q.question_no = o.question_no
-WHERE q.survey_id = 1
-ORDER BY q.question_no, o.option_no;
 ```
 
-하지만 새로운 설문 내용이 자주 생기기 때문에
-관리자가 SQL을 직접 수정하지 않고 웹 화면에서 설문을 만들 수 있도록
-변경하고 싶습니다.
+하지만 새로운 설문 제목부터 내용이 변경되어야 할 필요가 생겼고 성문자체도 추가해다된 내역이 생겼습니다.
+관리자가 SQL을 직접 수정하지 않고 웹 화면에서 설문을 만들 수 있도록 변경하고 싶습니다.
 
 ---
 
@@ -641,7 +651,7 @@ ORDER BY q.question_no, o.option_no;
 
 새 설문을 만들 때 먼저 기본정보를 입력합니다.
 
-특히 설문 제목은 다음과 같이 변경할 예정입니다.
+특히 현재의 설문 제목은 다음과 같이 변경할 예정입니다.
 
 「배차근무표 생성을 위한 의견청취」
 
@@ -672,8 +682,7 @@ ORDER BY q.question_no, o.option_no;
 
 가능해야 합니다.
 
-가능하다면 질문 순서를 변경할 수 있도록
-드래그 앤 드롭 또는 위/아래 이동 기능도 고려해주세요.
+가능하다면 질문 순서를 변경할 수 있도록 표 형태로 질분및 답변 번호를 지정할 수 있어야 합니다.
 
 # 7. 선택지 관리
 
@@ -690,10 +699,12 @@ single 또는 multi 질문인 경우 선택지를 입력할 수 있어야 합니
 
 현재 `drivers_survey_link`를 사용하고 있습니다.
 
+설문 마스터가 입력되면 일괄 등록될 필요 있음
+
 # 9. 설문 미리보기
 
 관리자가 실제 기사에게 보이는 설문 화면을
-미리 확인할 수 있는
+미리 확인할 수 있는 화면 필요
 
 
 # 10. 응답 데이터는 기존 구조를 최대한 유지
@@ -768,14 +779,7 @@ created_at
 updated_at
 ```
 
-현재의 `is_active`가 실제 요구사항에 적합한지 검토하고,
-
-* draft
-* active
-* closed
-
-같은 상태 관리가 더 적절하다면 그 이유와 함께 DB 변경안을 제시해주세요.
-
+디비 변경이 필요하다면 그 이유와 함께 DB 변경안을 제시해주세요.
 단, 기존 시스템과의 호환성을 최대한 고려해주세요.
 
 ---
@@ -847,13 +851,6 @@ updated_at
 │   │   ├─ 수정
 │   │   ├─ 삭제
 │   │   └─ 순서 변경
-│   │
-│   ├─ 대상자 관리
-│   │   ├─ 전체 기사
-│   │   ├─ 특정 기사
-│   │   ├─ 추가
-│   │   ├─ 수정
-│   │   └─ 삭제
 │   │
 │   └─ 미리보기
 │

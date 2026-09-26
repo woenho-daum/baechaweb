@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+{% block title %}미리보기{% endblock %}
+{% block content %}
+<div class="card" style="background:#fffbe6;border-color:#f2e2a8;font-size:13px;">
+  실제 기사님에게 보여지는 화면을 그대로 미리보기 한 것입니다. (제출 불가)
+</div>
+<div class="card">
+  <h2 style="margin-top:0;">{{ survey.survey_title }}</h2>
+  {% if survey.survey_subtitle %}<div style="color:#767b86;margin-bottom:12px;">{{ survey.survey_subtitle }}</div>{% endif %}
+  <div>{{ survey.description | safe }}</div>
+</div>
+
+{% for q in questions %}
+<div class="card">
+  <div style="font-weight:600;margin-bottom:8px;">
+    {{ q.question_no }}. {{ q.question_text }}
+    {% if q.is_required %}<span style="color:#e2483d;">*</span>{% endif %}
+  </div>
+  {% if q.question_type == 'text' %}
+    <textarea disabled placeholder="자유 응답"></textarea>
+  {% else %}
+    {% for o in options_by_question.get(q.question_no, []) %}
+    <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin:6px 0;">
+      <input type="{{ 'radio' if q.question_type == 'single' else 'checkbox' }}" disabled style="width:auto;">
+      {{ o.option_text }}
+    </label>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endfor %}
+
+<div class="card" style="text-align:right;">
+  <a class="btn" href="{{ url_for('admin_survey_questions', survey_id=survey.survey_id) }}">문항관리로 돌아가기</a>
+</div>
+{% endblock %}
